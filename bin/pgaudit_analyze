@@ -596,11 +596,9 @@ sub daemonInit
     chdir '/'
         or confess "chdir() failed: $!";
 
-    # close stdin/stdout
+    # close stdin, stdout previously closed/redirected
     open STDIN, '<', '/dev/null'
         or confess "Couldn't close standard input: $!";
-    open STDOUT, '>', $strLogOutFile
-        or confess "Couldn't close standard output: $!";
 
     # create new process
     defined($pid = fork)
@@ -612,6 +610,14 @@ sub daemonInit
     setsid() or confess("setsid() failed: $!");
 }
 
+####################################################################################################################################
+# getTimestamp
+####################################################################################################################################
+sub getTimestamp
+{
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+    return sprintf ( "%04d-%02d-%02d %02d:%02d:%02d", $year+1900,$mon+1,$mday,$hour,$min,$sec);
+}
 ####################################################################################################################################
 # Main loop
 ####################################################################################################################################
@@ -631,8 +637,12 @@ my $bDone = false;
 my $strNextLogFile = nextLogFile($strLogPath);
 
 # Open log file
-open(my $hLog, '>', $strLogOutFile)
+open(my $hLog, '>>', $strLogOutFile)
     or confess "unable to open pgAudit Analyze log file $strLogOutFile: $!";
+
+# always redirect stdout to logfile
+open (STDOUT, '>&', $hLog)
+    or confess "Couldn't close standard output and redirect to logfile: $!";
 
 # Daemonize the process
 daemonInit()
@@ -671,7 +681,7 @@ while(!$bDone)
             $strLogFile = $strNextLogFile;
             undef($strNextLogFile);
 
-            syswrite($hLog, "reading ${strLogFile}\n");
+            syswrite($hLog, "${\getTimestamp()}: reading ${strLogFile}\n");
 
             # Read updating file
             # http://stackoverflow.com/questions/1425223/how-do-i-read-a-file-which-is-constantly-updating
