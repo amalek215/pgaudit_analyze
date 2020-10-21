@@ -34,11 +34,8 @@ pgaudit_analyze [options] <pg-log-path>
    --socket-path        PostgreSQL host or socket directory (default to system default directory)
    --log-file           location of the log file for pgaudit_analyze (defaults to /var/log/pgaudit_analyze.log)
    --user               specify postgres user instead of using pgaudit_analyze invoker
-<<<<<<< HEAD
    --database           specify database name to save audit info to (default is database from log)
-=======
    --cluster-name       identifier to use if logging from multiple clusters (ie several replicas to one primary)
->>>>>>> cluster_id
 
  General Options:
    --help               display usage and exit
@@ -137,7 +134,7 @@ GetOptions ('help' => \$bHelp,
             'socket-path=s' => \$strSocketPath,
             'log-file=s' => \$strLogOutFile,
             'user=s' => \$strDbUser,
-            'database=s' => \$strDbOverride),
+            'database=s' => \$strDbOverride,
             'cluster-name=s' => \$strClusterName)
     or pod2usage(2);
 
